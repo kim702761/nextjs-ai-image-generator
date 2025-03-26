@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { generateImage } from '@/app/actions';
 import Image from 'next/image';
 
 export default function ImageGeneratorForm() {
@@ -22,10 +21,18 @@ export default function ImageGeneratorForm() {
       setIsGenerating(true);
       setError(null);
       
-      // Call the server action
-      const result = await generateImage(prompt);
+      // Call the API endpoint
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ prompt }),
+      });
       
-      if (result.success) {
+      const result = await response.json();
+      
+      if (response.ok && result.success) {
         setGeneratedImagePath(result.imagePath);
       } else {
         setError(result.error || 'Failed to generate image');
@@ -104,17 +111,28 @@ export default function ImageGeneratorForm() {
               className="object-contain rounded-md"
             />
           </div>
-          <div className="mt-4 text-sm text-gray-500">
-            <p>Prompt: {prompt}</p>
-            <button 
-              className="mt-2 text-blue-500 hover:text-blue-700"
-              onClick={() => {
-                // Download functionality would be implemented here
-                alert('In a real app, this would download the image');
-              }}
-            >
-              Download Image
-            </button>
+          <div className="mt-4 space-y-2">
+            <p className="text-sm text-gray-500">Prompt: {prompt}</p>
+            <div className="flex space-x-4">
+              <button 
+                className="text-blue-500 hover:text-blue-700 text-sm font-medium"
+                onClick={() => {
+                  // Download functionality would be implemented here
+                  alert('In a real app, this would download the image');
+                }}
+              >
+                Download Image
+              </button>
+              <button 
+                className="text-purple-500 hover:text-purple-700 text-sm font-medium"
+                onClick={() => {
+                  setPrompt('');
+                  setGeneratedImagePath(null);
+                }}
+              >
+                Create New Image
+              </button>
+            </div>
           </div>
         </div>
       )}
